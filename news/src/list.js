@@ -1,5 +1,5 @@
 const list = [{
-    title:'tell me the truth witput words',
+    title:'Tell me the truth witput words hmmm',
     url:'http://whatever.com',
     author:'rumit',
     num_comments:100,
@@ -7,7 +7,7 @@ const list = [{
     objectID:1
   },
   {
-    title:'tell me the  witput words',
+    title:'tell me the  witput words ten',
     url:'http://whatever.com',
     author:'rumit',
     num_comments:50,
@@ -15,7 +15,7 @@ const list = [{
     objectID:2
   },
   {
-    title:'tell me the truth words',
+    title:'tell me the truth words arent',
     url:'http://whatever.com',
     author:'rumit',
     num_comments:10,
