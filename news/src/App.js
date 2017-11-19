@@ -1,7 +1,18 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {Grid,Row,FormGroup} from 'react-bootstrap';
 import list from '../src/list';
+// default parameters to fetch data from the API
+
+const DEFAULT_QUERY = 'react';
+const PATH_BASE = 'http://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+
+// const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
+const url = `${PATH_BASE}${PATH_SEARCH}${PARAM_SEARCH}?${DEFAULT_QUERY}`;
+console.log(url);
+
+
 
 function isSearched(searchTerm){
   return function(item){
@@ -42,11 +53,17 @@ class App extends Component {
     const {list, searchTerm} = this.state;
   console.log(this);
     return (
-      <div className="App">
-     <Search 
-     onChange={this.searchValue} 
-      value={ searchTerm }
-      >Search here</Search>
+      <div>
+      <Grid fluid>
+        <Row>
+          <div className="jumbotron text-center">
+          <Search 
+          onChange={this.searchValue} 
+            value={ searchTerm }
+            >News App</Search>
+          </div>
+        </Row>
+      </Grid>
 
       <Table 
       list={list}
@@ -68,11 +85,24 @@ class App extends Component {
 const Search = ({ onChange, value, children})=>{
   return(
     <form>
-      {children}
-    <input 
-    type="text" 
-    onChange={onChange} 
-    value={ value }/>
+      <FormGroup>
+      <h1 style={{fontweight:'bold'}}>  {children}  </h1> 
+      <hr style={{border:'1px solid black',width:'100px'}}/>
+      <div className="input-group">
+      <input 
+        className="form-control width100 searchForm"
+        type="text" 
+        onChange={onChange} 
+        value={ value }/>
+        <span className="input-group-btn">
+        <button className="btn btn-primary searchBtn" type="submit">Search</button>
+        </span>
+
+      </div>
+       
+
+      </FormGroup>
+     
   </form>
   )
 }
@@ -80,17 +110,19 @@ const Search = ({ onChange, value, children})=>{
 
 const Table =({list,searchTerm,removeItem})=>{
   return (
-    <div>
+    <div className="col-ms-10 col-sm-offset-1">
         {
           list.filter(isSearched(searchTerm)).map(item=>{
             return (
               <div key={item.objectID}>
               <h1><a href={item.url}>{item.title}</a> by {item.author}</h1>
-              <p>{item.num_comments} Comments| {item.points} points</p>
-              <Button type="button"
+              <p>{item.num_comments} Comments| {item.points} points
+              <Button className="btn btn-danger btn-xs" type="button "
               onClick={()=>removeItem(item.objectID)}>
               Remove Me 
               </Button>
+              </p>
+              <hr/>
             </div> 
             )
           })
@@ -110,9 +142,11 @@ const Table =({list,searchTerm,removeItem})=>{
 //     )
 //   }
 // }
-function Button({onClick,children}){
+function Button({onClick,children,className}){
   return(
-    <button onClick={onClick}>
+    <button 
+    className={ className }
+    onClick={onClick}>
     {children}
     </button>
   )
