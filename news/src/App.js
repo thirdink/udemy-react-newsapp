@@ -7,7 +7,7 @@ const DEFAULT_QUERY = 'react';
 const PATH_BASE = 'http://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const DEFAULT_PAGE=0;
-const DEFAULT_HPP=100;
+const DEFAULT_HPP=25;
 
 
 const PARAM_SEARCH = 'query=';
@@ -39,6 +39,11 @@ class App extends Component {
     this.fetchTopStories = this.fetchTopStories.bind(this);
     this.setTopStories = this.setTopStories.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.checkTopStoriesSearchTerm=this.checkTopStoriesSearchTerm.bind(this);
+  }
+  // check top stories search term
+  checkTopStoriesSearchTerm(searchTerm){
+    return !this.state.results[searchTerm];
   }
   // set top stories
   setTopStories(result){
@@ -68,11 +73,16 @@ class App extends Component {
   onSubmit(event){
     const {searchTerm} = this.state;
     this.setState({ searchKey: searchTerm});
-    this.fetchTopStories(searchTerm, DEFAULT_PAGE);
+    if(this.checkTopStoriesSearchTerm(searchTerm)){
+      this.fetchTopStories(searchTerm, DEFAULT_PAGE);
+    }
+
+   
     event.preventDefault();
   }
   removeItem(id){
-    const {result } = this.state;
+    const {results, searchKey } = this.state;
+    const {hits,page} = results[searchKey]
     //console.log('Remove Item');
     // using javascript filter method 
     // we can filter out the clicked item and render the updated list
@@ -80,13 +90,13 @@ class App extends Component {
       return item.objectID!== id;
     }
     // create a new updated list
-    const updatedList = result.hits.filter(isNotId);
+    const updatedList = hits.filter(isNotId);
     // assign the new updated list to the list using setState method
     // this.setState({
     //   result: Object.assign({},this.state.result,{hits: updatedList})
       
     // });
-    this.setState({ result:{...result, hits: updatedList}});
+    this.setState({ results:{...results,[searchKey] : {hits: updatedList}}});
   }
   searchValue(event){
     // console.log(event);
@@ -116,19 +126,21 @@ class App extends Component {
         </Row>
       </Grid>
 
-      
-      <Table 
-      list={list}
-      searchTerm={searchTerm}
-      removeItem={this.removeItem}
-      /> 
-      
-      <div className="text-center alert">
-        <Button className="btn btn-success" 
-        onClick={()=> this.fetchTopStories(searchTerm,page + 1) }>
-          Load More
-        </Button>
-      </div>
+      <Grid>
+        <Row>
+          <Table 
+            list={list}
+            searchTerm={searchTerm}
+            removeItem={this.removeItem}
+            />     
+            <div className="text-center alert">
+              <Button className="btn btn-success" 
+              onClick={()=> this.fetchTopStories(searchTerm,page + 1) }>
+              Load More
+              </Button>
+            </div>
+        </Row>
+      </Grid>
 
       </div>
     );
