@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
 import {Grid,Row,FormGroup} from 'react-bootstrap';
 import list from '../src/list';
-// default parameters to fetch data from the API
+// import parameters from constants folder
+import {
+  DEFAULT_QUERY, 
+  PATH_BASE, 
+  PATH_SEARCH, 
+  DEFAULT_PAGE ,
+  DEFAULT_HPP, 
+  PARAM_SEARCH, 
+  PARAM_PAGE, 
+  PARAM_HPP
+} from '../src/constants/index';
 
-const DEFAULT_QUERY = 'react';
-const PATH_BASE = 'http://hn.algolia.com/api/v1';
-const PATH_SEARCH = '/search';
-const DEFAULT_PAGE=0;
-const DEFAULT_HPP=25;
 
 
-const PARAM_SEARCH = 'query=';
-const PARAM_PAGE='page=';
-const PARAM_HPP='hitsPerPage=';
 
 // const url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
 const url = `${PATH_BASE}${PATH_SEARCH}${PARAM_SEARCH}?${DEFAULT_QUERY}&${PARAM_PAGE}&${PARAM_HPP}${DEFAULT_HPP}`;
