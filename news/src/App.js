@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {Grid,Row,FormGroup} from 'react-bootstrap';
 import list from '../src/list';
+import PropTypes from 'prop-types';
 // import parameters from constants folder
 import {
   DEFAULT_QUERY, 
@@ -34,7 +35,8 @@ class App extends Component {
     this.state = {
       results:null,
       searchKey:'',
-      searchTerm: DEFAULT_QUERY
+      searchTerm: DEFAULT_QUERY,
+      isloading: false
     }
     this.removeItem=this.removeItem.bind(this);// alwasys bind inside the class constructor
     this.searchValue=this.searchValue.bind(this);
@@ -57,10 +59,13 @@ class App extends Component {
     const oldHits = results && results[searchKey]?results[searchKey].hits:[];
     const updatedHits = [...oldHits, ...hits];
     
-    this.setState({ results: { ...results, [searchKey]: {hits: updatedHits, page} }});
+    this.setState({ results: { ...results, [searchKey]: {hits: updatedHits, page} },
+      isloading: false
+    });
   }
   // fetch top stories
   fetchTopStories(searchTerm, page){
+    this.setState({isLoading:true});
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
     .then(response => response.json()).then(result => this.setTopStories(result))
     .catch(e => e);
@@ -106,7 +111,7 @@ class App extends Component {
 
   }
   render() {
-    const {results, searchTerm,searchKey} = this.state;
+    const {results, searchTerm,searchKey,isLoading} = this.state;
     const page = (results && results[searchKey] && results[searchKey].page) ||0;
     const list = (results && results[searchKey]&&results[searchKey].hits)||[];
     // if(!result){
@@ -136,10 +141,13 @@ class App extends Component {
             removeItem={this.removeItem}
             />     
             <div className="text-center alert">
+            {  
+              isLoading ? <Loading /> : 
               <Button className="btn btn-success" 
               onClick={()=> this.fetchTopStories(searchTerm,page + 1) }>
               Load More
-              </Button>
+              </Button> 
+            }
             </div>
         </Row>
       </Grid>
@@ -155,29 +163,37 @@ class App extends Component {
     
 //   }
 //}
-const Search = ({ onChange, value, children, onSubmit})=>{
-  return(
-    <form onSubmit={onSubmit}>
-      <FormGroup>
-      <h1 style={{fontweight:'bold'}}>  {children}  </h1> 
-      <hr style={{border:'1px solid black',width:'100px'}}/>
-      <div className="input-group">
-      <input 
-        className="form-control width100 searchForm"
-        type="text" 
-        onChange={onChange} 
-        value={ value }/>
-        <span className="input-group-btn">
-        <Button className="btn btn-primary searchBtn" type="submit">Search</Button>
-        </span>
+class Search extends Component{
+  componentDidMount(){
+    this.input.focus();
+  }
+  render(){
+    const {onChange, value, children, onSubmit}=this.props;
+      return(
+        <form onSubmit={onSubmit}>
+          <FormGroup>
+          <h1 style={{fontweight:'bold'}}>  {children}  </h1> 
+          <hr style={{border:'1px solid black',width:'100px'}}/>
+          <div className="input-group">
+          <input 
+            className="form-control width100 searchForm"
+            type="text" 
+            onChange={onChange} 
+            value={ value }
+            ref={(node)=>{this.input = node}}
+            />
+            <span className="input-group-btn">
+            <Button className="btn btn-primary searchBtn" type="submit">Search</Button>
+            </span>
 
-      </div>
-       
+          </div>
+          
 
-      </FormGroup>
-     
-  </form>
-  )
+          </FormGroup>
+        
+      </form>
+      )
+    }
 }
 
 
@@ -205,6 +221,18 @@ const Table =({list,searchTerm,removeItem})=>{
     )
 
 }
+Table.propTypes = {
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      objectID: PropTypes.string.isRequired,
+      author: PropTypes.string,
+      url: PropTypes.string,
+      num_comments: PropTypes.number,
+      points: PropTypes.number,
+    })
+  ).isRequired,
+  removeItem: PropTypes.func.isRequired,
+}
 
 // class Button extends Component{
 //   render(){
@@ -222,5 +250,17 @@ const Button = ({ onClick, children, className='' }) =>
   onClick={ onClick } >
   { children }
 </button>
+Button.PropTypes = {
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string,
+  children: PropTypes
+}
+Button.defaultProps ={
+  className: '',
+}
+const Loading = () => 
+  <div>
+    Loading...
+  </div>
 
 export default App;
