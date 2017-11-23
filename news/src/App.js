@@ -42,6 +42,15 @@ function isSearched(searchTerm){
     return !searchTerm || item.title.toLowerCase().includes(searchTerm.toLowerCase());
   }
 }
+const updatedTopStories = (hits, page) => prevState => {
+  const {searchKey,results} = prevState;
+  const oldHits = results && results[searchKey]?results[searchKey].hits:[];
+  const updatedHits = [...oldHits, ...hits];
+  return { 
+    results: { ...results, [searchKey]: {hits: updatedHits, page} },
+    isloading: false
+        }
+}
 
 class App extends Component {
   constructor(props){
@@ -51,8 +60,7 @@ class App extends Component {
       searchKey:'',
       searchTerm: DEFAULT_QUERY,
       isloading: false,
-      sortKey: 'NONE',
-      isSortReverse: false
+     
 
     }
     this.removeItem=this.removeItem.bind(this);// alwasys bind inside the class constructor
@@ -61,13 +69,9 @@ class App extends Component {
     this.setTopStories = this.setTopStories.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.checkTopStoriesSearchTerm=this.checkTopStoriesSearchTerm.bind(this);
-    this.onSort=this.onSort.bind(this)
+    
   }
-  // sorting fucntion
-  onSort(sortKey){
-    const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
-    this.setState({sortKey, isSortReverse});
-  }
+
   // check top stories search term
   checkTopStoriesSearchTerm(searchTerm){
     return !this.state.results[searchTerm];
@@ -76,15 +80,12 @@ class App extends Component {
   setTopStories(result){
     // get the hits nad page from the result
     const {hits,page} = result;
+    this.setState(updatedTopStories(hits, page));
     // // meaning page is not 0, button has been clicked, page might be 1 or 2
     // old hits are already available in the state
-    const {searchKey,results} = this.state;
-    const oldHits = results && results[searchKey]?results[searchKey].hits:[];
-    const updatedHits = [...oldHits, ...hits];
+
     
-    this.setState({ results: { ...results, [searchKey]: {hits: updatedHits, page} },
-      isloading: false
-    });
+
   }
   // fetch top stories
   fetchTopStories(searchTerm, page){
@@ -160,10 +161,6 @@ class App extends Component {
         <Row>
           <Table 
             list={list}
-            sortKey={sortKey}
-            isSortReverse={isSortReverse}
-            onSort={this.onSort}
-            searchTerm={searchTerm}
             removeItem={this.removeItem}
             />     
             <div className="text-center alert">
@@ -224,75 +221,95 @@ class Search extends Component{
 }
 
 
-const Table =({list,searchTerm,removeItem,sortKey,onSort, isSortReverse})=>{
-const sortedList = SORTS[sortKey](list);
-const reverseSortedList = isSortReverse ? sortedList.reverse() : sortedList;
-
-  return (
-    <div className="col-ms-10 col-sm-offset-1">
-        <div className="text-center">
-        <hr/>
-        <Sort className="btn btn-xs btn-default sortBtn" 
-          sortKey ={'NONE'}
-                onSort={onSort} 
-                activeSortKey = { sortKey }
-                >Default</Sort>
-          <Sort className="btn btn-xs btn-default sortBtn" 
-          sortKey ={'TITLE'}
-                onSort={onSort} 
-                activeSortKey = { sortKey }
-                >Title</Sort>
-          <Sort className="btn btn-xs btn-default sortBtn" 
-          sortKey ={'AUTHOR'}
-                onSort={onSort} 
-                activeSortKey = { sortKey }
-                >Author</Sort>
-          <Sort className="btn btn-xs btn-default sortBtn" 
-          sortKey ={'COMMENTS'}
-                onSort={onSort} 
-                activeSortKey = { sortKey }
-                >Comments</Sort>
-          <Sort className="btn btn-xs btn-default sortBtn" 
-          sortKey ={'POINTS'}
-                onSort={onSort} 
-                activeSortKey = { sortKey }
-                >Points</Sort>
-                <hr/>
-        </div>
-        { 
-
-          // list.filter(isSearched(searchTerm)).map(item=>{
-            reverseSortedList.map(item=>{
-            return (
-              <div key={item.objectID}>
-              <h1><a href={item.url}>{item.title}</a> by {item.author}</h1>
-              <p>{item.num_comments} Comments| {item.points} points
-              <Button className="btn btn-danger btn-xs" type="button "
-              onClick={()=>removeItem(item.objectID)}>
-              Remove Me 
-              </Button>
-              </p>
-              <hr/>
-            </div> 
-            )
-          })
+// const Table =({list,searchTerm,removeItem,sortKey,onSort, isSortReverse})=>{
+  class Table extends Component{
+    constructor(props){
+      super(props);
+        this.state={
+          sortKey: 'NONE',
+          isSortReverse: false
         }
-    </div>
-    )
 
-}
-Table.propTypes = {
-  list: PropTypes.arrayOf(
-    PropTypes.shape({
-      objectID: PropTypes.string.isRequired,
-      author: PropTypes.string,
-      url: PropTypes.string,
-      num_comments: PropTypes.number,
-      points: PropTypes.number,
-    })
-  ).isRequired,
-  removeItem: PropTypes.func.isRequired,
-}
+        this.onSort=this.onSort.bind(this);
+      
+    }
+// sorting fucntion
+  onSort(sortKey){
+    const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
+    this.setState({sortKey, isSortReverse});
+  }
+    render(){
+          const {sortKey, isSortReverse} = this.state;
+          const {list,searchTerm,removeItem} = this.props;
+          const sortedList = SORTS[sortKey](list);
+          const reverseSortedList = isSortReverse ? sortedList.reverse() : sortedList;
+
+            return (
+              <div className="col-ms-10 col-sm-offset-1">
+                  <div className="text-center">
+                  <hr/>
+                  <Sort className="btn btn-xs btn-default sortBtn" 
+                    sortKey ={'NONE'}
+                          onSort={this.onSort} 
+                          activeSortKey = { sortKey }
+                          >Default</Sort>
+                    <Sort className="btn btn-xs btn-default sortBtn" 
+                    sortKey ={'TITLE'}
+                          onSort={this.onSort} 
+                          activeSortKey = { sortKey }
+                          >Title</Sort>
+                    <Sort className="btn btn-xs btn-default sortBtn" 
+                    sortKey ={'AUTHOR'}
+                          onSort={this.onSort} 
+                          activeSortKey = { sortKey }
+                          >Author</Sort>
+                    <Sort className="btn btn-xs btn-default sortBtn" 
+                    sortKey ={'COMMENTS'}
+                          onSort={this.onSort} 
+                          activeSortKey = { sortKey }
+                          >Comments</Sort>
+                    <Sort className="btn btn-xs btn-default sortBtn" 
+                    sortKey ={'POINTS'}
+                          onSort={this.onSort} 
+                          activeSortKey = { sortKey }
+                          >Points</Sort>
+                          <hr/>
+                  </div>
+                  { 
+
+                    // list.filter(isSearched(searchTerm)).map(item=>{
+                      reverseSortedList.map(item=>{
+                      return (
+                        <div key={item.objectID}>
+                        <h1><a href={item.url}>{item.title}</a> by {item.author}</h1>
+                        <p>{item.num_comments} Comments| {item.points} points
+                        <Button className="btn btn-danger btn-xs" type="button "
+                        onClick={()=>removeItem(item.objectID)}>
+                        Remove Me 
+                        </Button>
+                        </p>
+                        <hr/>
+                      </div> 
+                      )
+                    })
+                  }
+              </div>
+              )
+
+          }
+        }
+          Table.propTypes = {
+            list: PropTypes.arrayOf(
+              PropTypes.shape({
+                objectID: PropTypes.string.isRequired,
+                author: PropTypes.string,
+                url: PropTypes.string,
+                num_comments: PropTypes.number,
+                points: PropTypes.number,
+              })
+            ).isRequired,
+            removeItem: PropTypes.func.isRequired,
+          }
 
 // class Button extends Component{
 //   render(){
