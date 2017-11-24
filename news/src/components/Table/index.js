@@ -42,7 +42,7 @@ const SORTS = {
                 return (
                   <div className="col-ms-10 col-sm-offset-1">
                       <div className="text-center">
-                      <hr/>
+                      
                       <Sort className="btn btn-xs btn-default sortBtn" 
                         sortKey ={'NONE'}
                               onSort={this.onSort} 
