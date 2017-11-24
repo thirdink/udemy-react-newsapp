@@ -19,7 +19,7 @@
     "predeploy":"npm run build",
     "deploy":"gh-pages -d build"
   },
-  "homepage": "https://thirdink.github.io/udemy-react-newsapp/news",
+  "homepage": "https://thirdink.github.io/udemy-react-newsapp/news/",
   "devDependencies": {
     "gh-pages": "^1.1.0"
   }

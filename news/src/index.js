@@ -9,7 +9,7 @@ import {Navbar,Nav,NavItem, NavbarBrand} from 'react-bootstrap';
 import registerServiceWorker from './registerServiceWorker';
 
 const Root = () =>
-<Router basename="udemy-react-newsapp/news">
+<Router basename="udemy-react-newsapp/news/">
 <div>
     <Navbar>
         <Navbar.Header>
